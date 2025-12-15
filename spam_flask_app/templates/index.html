@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spam Email Classifier</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <!-- Lottie player -->
+  <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+  <style>
+    body {
+      font-family: 'Roboto', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      background: linear-gradient(-45deg, #667eea, #764ba2, #ff758c, #ff7eb3);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+    }
+
+    @keyframes gradientBG {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+
+    .card {
+      max-width: 950px;
+      width: 100%;
+      border-radius: 25px;
+      padding: 40px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      transition: transform 0.3s, box-shadow 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 25px 70px rgba(0,0,0,0.35);
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 20px;
+      font-weight: 700;
+      color: #fff;
+      text-shadow: 1px 1px 6px rgba(0,0,0,0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 15px;
+    }
+
+    textarea {
+      resize: none;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      padding: 15px;
+      font-size: 1rem;
+      background: rgba(255,255,255,0.8);
+    }
+
+    .btn-primary {
+      border-radius: 12px;
+      font-size: 1.1rem;
+      padding: 12px 35px;
+      background: linear-gradient(135deg, #ff758c, #667eea);
+      border: none;
+      transition: 0.3s;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #667eea, #ff758c);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    }
+
+    .result-card {
+      margin-top: 30px;
+      padding: 25px;
+      border-radius: 20px;
+      font-size: 1.15rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      backdrop-filter: blur(15px);
+      background: rgba(255,255,255,0.25);
+      border-left: 8px solid;
+      transition: transform 0.3s;
+    }
+    .result-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .spam {
+      border-color: #ff0000;
+      color: #b30000;
+    }
+    .ham {
+      border-color: #00b300;
+      color: #006600;
+    }
+
+    .email-text {
+      background: rgba(255,255,255,0.85);
+      padding: 15px;
+      border-radius: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      flex: 1;
+    }
+
+    .badge {
+      font-size: 1rem;
+      padding: 8px 18px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .badge-spam {
+      background-color: #ff4d4d;
+      color: white;
+      animation: pulse 1.5s infinite;
+    }
+    .badge-ham {
+      background-color: #28a745;
+      color: white;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+
+    /* Animated Lottie container */
+    .header-animation {
+      width: 60px;
+      height: 60px;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h2>
+      <lottie-player class="header-animation" src="https://assets4.lottiefiles.com/packages/lf20_iwmd6pyr.json"  background="transparent" speed="1" loop autoplay></lottie-player>
+      Spam Email Classifier
+    </h2>
+    <form method="POST" action="/">
+      <div class="mb-3">
+        <label for="email_text" class="form-label text-white">Enter Email Text:</label>
+        <textarea class="form-control" id="email_text" name="email_text" rows="8" placeholder="Type or paste your email here..." required>{{ email_text }}</textarea>
+      </div>
+      <div class="text-center">
+        <button type="submit" class="btn btn-primary"><i class="fas fa-magic"></i> Predict</button>
+      </div>
+    </form>
+
+    {% if result %}
+    <div class="result-card {{ 'spam' if result=='Spam' else 'ham' }}">
+      <span class="badge {{ 'badge-spam' if result=='Spam' else 'badge-ham' }}">
+        <lottie-player style="width:30px; height:30px;" 
+                       src="{{ 'https://assets3.lottiefiles.com/packages/lf20_kxsd2ytq.json' if result=='Spam' else 'https://assets3.lottiefiles.com/packages/lf20_jbrw3hcz.json' }}" 
+                       background="transparent" speed="1" loop autoplay>
+        </lottie-player>
+        {{ result }}
+      </span>
+      <div class="email-text">{{ email_text }}</div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Bootstrap JS Bundle -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/js/all.min.js"></script>
+</body>
+</html>
